@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body { 
+      font-family: 'Montserrat', sans-serif; 
+      padding: 10px; 
+      background-color: transparent; 
+      color: #4a453f; 
+      margin: 0;
+      box-sizing: border-box;
+    }
+    .card { 
+      background: #FBF9F5; 
+      padding: 22px; 
+      border-radius: 16px; 
+      box-shadow: 0 8px 25px rgba(112, 41, 99, 0.08); 
+      width: 100%;
+      max-width: 420px; 
+      margin: 0 auto; 
+      border: 1px solid #D0C3F1; 
+      position: relative; 
+      box-sizing: border-box;
+    }
+    h2 { 
+      font-family: 'Cormorant Garamond', serif; 
+      text-align: center; 
+      color: #702963; 
+      font-size: 30px;
+      margin-top: 0; 
+      font-weight: 600;
+    }
+    label { 
+      font-weight: 500; 
+      margin-top: 12px; 
+      display: block; 
+      font-size: 11px; 
+      color: #702963; 
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    
+    .search-container { position: relative; width: 100%; }
+    input[type="text"] { 
+      width: 100%; 
+      padding: 12px; 
+      margin-top: 6px; 
+      border: 1px solid #D0C3F1; 
+      border-radius: 8px; 
+      box-sizing: border-box; 
+      font-size: 14px; 
+      background: #ffffff;
+      font-family: 'Montserrat', sans-serif;
+    }
+    input[type="text"]:focus { outline: none; border-color: #702963; box-shadow: 0 0 5px rgba(112, 41, 99, 0.2); }
+    
+    #suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #D0C3F1;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      max-height: 150px;
+      overflow-y: auto;
+      z-index: 99;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      display: none;
+    }
+    .suggestion-item { padding: 10px 12px; cursor: pointer; font-size: 13px; border-bottom: 1px solid #f7f3fd; }
+    .suggestion-item:hover { background-color: #D0C3F1; color: #702963; }
+
+    .details-box { 
+      background: #D0C3F1; 
+      border: 1px solid #bdaae8;
+      padding: 14px 15px; 
+      margin-top: 15px; 
+      border-radius: 10px; 
+      display: none; 
+      text-align: center;
+    }
+    .details-box .table-intro {
+      margin: 0 0 4px 0;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12px;
+      color: #4a3b5c;
+      font-weight: 500;
+    }
+    .details-box h3 {
+      font-family: 'Cormorant Garamond', serif;
+      color: #702963;
+      margin: 0 0 5px 0;
+      font-size: 24px;
+      font-weight: 600;
+    }
+    .details-box .seat-count {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      font-size: 11px;
+      color: #702963;
+      margin: 0;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .guest-list-container { margin-top: 15px; display: none; }
+    .guest-row { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      padding: 10px 0; 
+      border-bottom: 1px solid #efe8fa; 
+    }
+    .guest-name-label { font-size: 13px; font-weight: 500; color: #3c3830; padding-right: 10px; }
+
+    .switch { position: relative; display: inline-block; width: 46px; height: 24px; flex-shrink: 0; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #d8c9bc; transition: .4s; border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px;
+      background-color: white; transition: .4s; border-radius: 50%;
+    }
+    
+    input:checked + .slider { background-color: #2e7d32; } 
+    input:checked + .slider:before { transform: translateX(22px); }
+    
+    .toggle-label-text { font-size: 10px; color: #702963; display: block; text-align: right; margin-top: 2px; font-weight: 500; }
+
+    .btn { 
+      width: 100%; 
+      background: #702963; 
+      color: white; 
+      border: none; 
+      padding: 12px; 
+      font-size: 13px; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      margin-top: 20px; 
+      font-weight: 500; 
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: background 0.3s; 
+    }
+    .btn:hover { background: #541d4a; }
+    .btn:disabled { background: #ccc; cursor: not-allowed; }
+    
+    #message { text-align: center; font-weight: 500; margin-top: 12px; font-size: 13px; color: #702963; }
+
+    .rsvp-footer {
+      margin-top: 25px;
+      padding-top: 15px;
+      border-top: 1px dashed #D0C3F1;
+      text-align: center;
+    }
+    .rsvp-footer h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #702963;
+      margin: 0 0 4px 0;
+    }
+    .rsvp-footer .deadline-date {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      color: #702963;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    .rsvp-footer p {
+      font-size: 10.5px;
+      color: #5c554e;
+      line-height: 1.4;
+      margin: 6px 0;
+    }
+    .rsvp-footer .strict-note {
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #702963;
+      margin-top: 10px;
+    }
+
+    #modalOverlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(112, 41, 99, 0.4); display: none; justify-content: center; align-items: center; z-index: 999;
+      padding: 15px;
+      box-sizing: border-box;
+    }
+    .modal-card { background: #FBF9F5; padding: 25px; border-radius: 14px; max-width: 340px; width: 100%; text-align: center; border: 1px solid #D0C3F1; box-shadow: 0 8px 20px rgba(0,0,0,0.15); box-sizing: border-box; }
+    .modal-card h3 { font-family: 'Cormorant Garamond', serif; color: #702963; margin-top: 0; margin-bottom: 10px; font-size: 24px; }
+    .modal-card p { font-size: 13px; color: #5c554e; line-height: 1.5; margin: 6px 0; }
+    .confirmed-list {
+      background: #D0C3F1;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin: 12px 0;
+      text-align: left;
+      font-size: 12.5px;
+      color: #3c3830;
+    }
+    .confirmed-list div {
+      padding: 4px 0;
+      border-bottom: 1px solid #bdaae8;
+    }
+    .confirmed-list div:last-child {
+      border-bottom: none;
+    }
+    .status-accepted { color: #2e7d32; font-weight: 600; }
+    .status-declined { color: #c62828; font-weight: 600; }
+    .modal-btn { background: #702963; color: white; border: none; padding: 10px 20px; border-radius: 6px; margin-top: 12px; cursor: pointer; font-weight: 500; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>You Are Invited</h2>
+    
+    <label for="guestSearch">Find Your Name</label>
+    <div class="search-container">
+      <input type="text" id="guestSearch" placeholder="Type at least 3 letters..." autocomplete="off" oninput="filterNames()">
+      <div id="suggestions"></div>
+    </div>
+    <p id="loadingStatus" style="font-size: 10.5px; color: #702963; margin-top: 5px;">Loading guest list...</p>
+
+    <div id="detailsCard" class="details-box">
+      <p class="table-intro">Your seat table is:</p>
+      <h3 id="seatTitle">VIP Table</h3>
+      <p class="seat-count" id="reservedSeatsText"></p>
+    </div>
+
+    <div id="rsvpForm" class="guest-list-container">
+      <label style="margin-top: 15px; text-align: center;">Confirm Attendance</label>
+      <p style="font-size: 11px; color: #702963; text-align: center; margin-bottom: 12px;">Toggle each name below to mark attendance.</p>
+      
+      <div id="dynamicGuestToggles"></div>
+
+      <button id="submitBtn" class="btn" onclick="sendRSVP()">Confirm Response</button>
+    </div>
+
+    <div id="message"></div>
+
+    <div class="rsvp-footer">
+      <h4>RSVP Deadline</h4>
+      <div class="deadline-date">March 20, 2027</div>
+      <p>Only guests with confirmed RSVPs will be accommodated at the celebration. No RSVP before deadline considered as declined.</p>
+      <p class="strict-note">Strictly No Plus-Ones.</p>
+      <p style="font-style: italic; margin-top: 8px;">Thank you for your kind understanding.</p>
+    </div>
+  </div>
+
+  <div id="modalOverlay">
+    <div class="modal-card">
+      <h3>Already Confirmed</h3>
+      <p>Hello,</p>
+      <p>Our records show that you have already submitted your RSVP.</p>
+      <div id="modalMemberStatuses" class="confirmed-list"></div>
+      <p style="font-size: 11.5px; color: #5c554e; margin-top: 8px;">If you need to change your response, please kindly contact the couple directly.</p>
+      <button class="modal-btn" onclick="closeModal()">Got it</button>
+    </div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx6Gr0QXFWNtwvcdNYr-QDPTEOfJdWyXvA0g3OCfJxt_Q9cv1Geo128QutbFdDE0yCL/exec";
+
+    let guestNames = [];
+    let selectedMainGuest = "";
+    let currentMembers = [];
+
+    window.onload = function() {
+      fetch(`${SCRIPT_URL}?action=getGuestList`)
+        .then(res => res.json())
+        .then(names => {
+          guestNames = names || [];
+          document.getElementById('loadingStatus').innerText = "Type at least 3 letters to search your invitation.";
+        })
+        .catch(err => {
+          document.getElementById('loadingStatus').innerText = "Ready. Type at least 3 letters to search.";
+        });
+    };
+
+    function filterNames() {
+      const input = document.getElementById('guestSearch');
+      const val = input.value.trim().toLowerCase();
+      const suggestionsBox = document.getElementById('suggestions');
+      
+      suggestionsBox.innerHTML = '';
+      
+      if (val.length < 3) {
+        suggestionsBox.style.display = 'none';
+        document.getElementById('detailsCard').style.display = 'none';
+        document.getElementById('rsvpForm').style.display = 'none';
+        return;
+      }
+
+      const matches = guestNames.filter(name => name.toLowerCase().includes(val));
+      
+      if (matches.length > 0) {
+        suggestionsBox.style.display = 'block';
+        matches.forEach(name => {
+          const item = document.createElement('div');
+          item.className = 'suggestion-item';
+          item.innerText = name;
+          item.onclick = function() {
+            input.value = name;
+            suggestionsBox.style.display = 'none';
+            selectGuest(name);
+          };
+          suggestionsBox.appendChild(item);
+        });
+      } else {
+        suggestionsBox.style.display = 'none';
+      }
+    }
+
+    function selectGuest(name) {
+      document.getElementById('loadingStatus').innerText = "Fetching invitation details...";
+      fetch(`${SCRIPT_URL}?action=getGuestDetails&name=${encodeURIComponent(name)}`)
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById('loadingStatus').innerText = "";
+          displayGuestDetails(data);
+        });
+    }
+
+    function displayGuestDetails(data) {
+      if (data) {
+        selectedMainGuest = data.mainGuest;
+        currentMembers = data.members;
+        
+        const seatCount = data.members.length;
+        document.getElementById('seatTitle').innerText = data.seat;
+        document.getElementById('reservedSeatsText').innerText = `${seatCount} ${seatCount > 1 ? 'Seats' : 'Seat'} Reserved`;
+        document.getElementById('detailsCard').style.display = 'block';
+        
+        if (data.alreadyConfirmed) {
+          document.getElementById('rsvpForm').style.display = 'none';
+          
+          const statusContainer = document.getElementById('modalMemberStatuses');
+          statusContainer.innerHTML = '';
+          
+          data.members.forEach(member => {
+            const rawStatus = (member.status || '').toLowerCase();
+            const isAttending = rawStatus === 'attending' || rawStatus === 'accepted' || rawStatus === 'going';
+            const displayLabel = isAttending ? 'ATTENDING' : 'DECLINED';
+            const statusClass = isAttending ? 'status-accepted' : 'status-declined';
+            
+            statusContainer.innerHTML += `<div>${member.name} - <span class="${statusClass}">${displayLabel}</span></div>`;
+          });
+
+          document.getElementById('modalOverlay').style.display = 'flex';
+        } else {
+          const container = document.getElementById('dynamicGuestToggles');
+          container.innerHTML = '';
+          
+          data.members.forEach((member, index) => {
+            container.innerHTML += `
+              <div class="guest-row">
+                <span class="guest-name-label">${index + 1}. ${member.name}</span>
+                <div>
+                  <label class="switch">
+                    <input type="checkbox" id="toggle_${index}" checked>
+                    <span class="slider"></span>
+                  </label>
+                  <span class="toggle-label-text" id="text_${index}">Joyfully Accepts</span>
+                </div>
+              </div>
+            `;
+          });
+
+          data.members.forEach((member, index) => {
+            const checkbox = document.getElementById(`toggle_${index}`);
+            const textSpan = document.getElementById(`text_${index}`);
+            checkbox.onchange = function() {
+              textSpan.innerText = checkbox.checked ? "Joyfully Accepts" : "Regretfully Declines";
+            };
+          });
+
+          document.getElementById('rsvpForm').style.display = 'block';
+          document.getElementById('message').innerText = '';
+        }
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').style.display = 'none';
+    }
+
+    function sendRSVP() {
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerText = 'Submitting...';
+
+      let payload = [];
+      currentMembers.forEach((member, index) => {
+        const isChecked = document.getElementById(`toggle_${index}`).checked;
+        payload.push({
+          rowIndex: member.rowIndex,
+          status: isChecked ? 'Attending' : 'Declined'
+        });
+      });
+
+      fetch(`${SCRIPT_URL}?action=submitRSVP&responses=${encodeURIComponent(JSON.stringify(payload))}`)
+        .then(res => res.json())
+        .then(res => {
+          btn.disabled = false;
+          btn.innerText = 'Confirm Response';
+          if (res.success) {
+            document.getElementById('rsvpForm').style.display = 'none';
+            document.getElementById('message').innerText = 'Thank you! Your response has been recorded.';
+          } else {
+            document.getElementById('message').innerText = res.message || 'An error occurred.';
+          }
+        })
+        .catch(err => {
+          btn.disabled = false;
+          btn.innerText = 'Confirm Response';
+          document.getElementById('message').innerText = 'Network error. Please try again.';
+        });
+    }
+  </script>
+</body>
+</html>
